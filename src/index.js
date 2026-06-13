@@ -18,9 +18,14 @@ const app = express();
 
 // --- SECURE CORS AND NETWORK INTEGRATION ---
 const allowedOrigins = [
-  "http://localhost:5173", // Vite's default local development server
+  "http://localhost:5173", 
   "http://127.0.0.1:5173"
 ];
+
+// 🌟 DYNAMICALLY INJECT PRODUCTION VERCEL URL IF IT EXISTS IN .ENV
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -33,9 +38,9 @@ app.use(cors({
       callback(new Error("Not allowed by CORS policy of Venclux Security Engine"));
     }
   },
-  credentials: true, // Necessary if you decide to pass HTTP cookies or use specific session managers
+  credentials: true, 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"] // Explicitly whitelist your JWT Bearer tracking header
+  allowedHeaders: ["Content-Type", "Authorization"] 
 }));
 // -------------------------------------------
 
