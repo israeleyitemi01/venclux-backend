@@ -217,39 +217,6 @@ export const getDashboardSummary = async (req, res) => {
         return [];
       });
 
-    // 4. Extract Sales Analytics Chart Dataset (STRICT PAYMENT CHECK REMAINING)
-    // Going back 10 days to make sure timezone differences don't cut off orders placed 6-7 days ago
-    const chartWindowStart = new Date();
-    chartWindowStart.setDate(chartWindowStart.getDate() - 10);
-    chartWindowStart.setHours(0, 0, 0, 0); 
-
-    const salesChartPromise = Order.aggregate([
-      {
-        $match: {
-          ...orderMatch,
-          createdAt: { $gte: chartWindowStart },
-          // STRICT SECURITY CHECK: Only accept verified paid entries
-          $expr: {
-            $in: [
-              { $toUpper: { $ifNull: ["$paymentStatus", ""] } },
-              ["PAID", "SUCCESS", "SUCCESSFUL"]
-            ]
-          }
-        },
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%a", date: "$createdAt" } },
-          revenue: { $sum: "$totalAmount" },
-          sortDate: { $min: "$createdAt" },
-        },
-      },
-      { $sort: { sortDate: 1 } },
-    ]).catch((err) => {
-      console.error("Aggregation Error in Sales Chart:", err);
-      return [];
-    });
-
     // 5. Query Best Selling Top Products
     const topProductsPromise = Order.aggregate([
       { $match: orderMatch },
@@ -273,19 +240,17 @@ export const getDashboardSummary = async (req, res) => {
           },
         },
       },
-      { $sort: { totalSold: -1 } },
-      { $limit: 4 },
-    ]).catch((err) => {
+    ]).sort({ totalSold: -1 }).limit(4).catch((err) => {
       console.error("Aggregation Error in Top Products:", err);
       return [];
     });
 
-    const [metrics, customerCount, recentOrders, salesChart, topProducts] =
+    // Execute promises 1, 2, 3, and 5 in parallel
+    const [metrics, customerCount, recentOrders, topProducts] =
       await Promise.all([
         metricsPromise,
         customerCountPromise,
         recentOrdersPromise,
-        salesChartPromise,
         topProductsPromise,
       ]);
 
@@ -294,7 +259,17 @@ export const getDashboardSummary = async (req, res) => {
         ? metrics[0]
         : { totalRevenue: 0, totalOrders: 0, pendingOrders: 0, paidOrders: 0 };
 
-    // --- CALENDAR FILL ENGINE ---
+    // 4. Extract Sales Analytics Chart Dataset (CRASH-PROOF JAVASCRIPT LOOKUP ENGINE)
+    const chartWindowStart = new Date();
+    chartWindowStart.setDate(chartWindowStart.getDate() - 7); 
+    chartWindowStart.setHours(0, 0, 0, 0); 
+
+    const rawChartOrders = await Order.find({
+      ...orderMatch,
+      createdAt: { $gte: chartWindowStart }
+    }).select("createdAt totalAmount paymentStatus").lean();
+
+    // --- CALENDAR FILL MATRIX ENGINE ---
     const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const currentDayIndex = new Date().getDay();
 
@@ -304,14 +279,26 @@ export const getDashboardSummary = async (req, res) => {
       chronologicalDays.push(daysOfWeek[index]);
     }
 
+    // Initialize all daily map tracking nodes to 0
     const dbSalesMap = {};
-    (salesChart || []).forEach((item) => {
-      if (item._id) dbSalesMap[item._id] = item.revenue;
-    });
+    chronologicalDays.forEach(day => { dbSalesMap[day] = 0; });
+
+    // Iterate over matching transactions to assemble dynamic daily performance aggregates
+    if (rawChartOrders && rawChartOrders.length > 0) {
+      rawChartOrders.forEach(order => {
+        const status = (order.paymentStatus || "").toUpperCase();
+        if (["PAID", "SUCCESS", "SUCCESSFUL"].includes(status)) {
+          const orderDay = new Date(order.createdAt).toLocaleDateString("en-US", { weekday: "short" });
+          if (dbSalesMap[orderDay] !== undefined) {
+            dbSalesMap[orderDay] += Number(order.totalAmount || 0);
+          }
+        }
+      });
+    }
 
     const finalChartDataset = chronologicalDays.map((dayName) => ({
       day: dayName,
-      revenue: dbSalesMap[dayName] ? Number(dbSalesMap[dayName]) : 0
+      revenue: dbSalesMap[dayName] || 0
     }));
 
     // --- GENERATE REALTIME COMPONENT FEED ---
