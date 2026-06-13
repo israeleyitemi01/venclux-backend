@@ -23,7 +23,7 @@ const allowedOrigins = [
   "http://127.0.0.1:5173"
 ];
 
-// 🌟 DYNAMICALLY INJECT PRODUCTION VERCEL URL IF IT EXISTS IN .ENV
+// DYNAMICALLY INJECT PRODUCTION VERCEL URL IF IT EXISTS IN .ENV
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
@@ -36,14 +36,15 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS policy of Venclux Security Engine"));
+      // Return false instead of throwing a hard backend Error to stop preflight crashes
+      callback(null, false);
     }
   },
   credentials: true, 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"] 
 }));
-// -------------------------------------------
+// --- Note: Separate app.options line removed entirely since app.use(cors()) handles preflights perfectly! ---
 
 // Standard body-parsing middlewares
 app.use(express.json()); 
