@@ -11,6 +11,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import publicStoreRoutes from "./routes/publicStoreRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/vendor", vendorRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Venclux backend API. Transforming WhatsApp Commerce!");
