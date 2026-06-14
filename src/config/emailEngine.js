@@ -58,7 +58,7 @@ export const sendVerificationOtpMail = async (targetEmail, storeName, otpCode) =
     if (process.env.RESEND_API_KEY && resend) {
         try {
             const response = await resend.emails.send({
-                from: "Venclux Security <auth@send.venclux.site>", // Verified Namecheap sub-domain subroute
+                from: "Venclux Security <auth@venclux.site>", // Verified Namecheap sub-domain subroute
                 to: targetEmail,
                 subject: emailSubject,
                 html: emailHtmlBody,
