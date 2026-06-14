@@ -3,13 +3,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Configure the SMTP pool transport engine for Gmail
+// ✅ FIXED FOR PRODUCTION: Using explicit host and secure SSL port 465 to bypass cloud firewall blocks
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // true for port 465 secure SSL connections
     auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_PASS,
     },
+    // Pro-Tip: Add a tight connection timeout threshold so it doesn't leave your server hanging
+    connectionTimeout: 5000, 
 });
 
 /**
@@ -56,7 +60,7 @@ export const sendVerificationOtpMail = async (targetEmail, storeName, otpCode) =
         console.log("🚀 Live Production Mail Dispatched Successfully. ID:", info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (err) {
-        // 🌟 CRITICAL ERROR DIAGNOSTICS FOR RENDER LOGS
+        // CRITICAL ERROR DIAGNOSTICS FOR RENDER LOGS
         console.error("❌ --- LIVE PRODUCTION MAIL RUNTIME FAILURE --- ❌");
         console.error("Reason:", err.message);
         console.error("Error Code:", err.code);
@@ -66,39 +70,3 @@ export const sendVerificationOtpMail = async (targetEmail, storeName, otpCode) =
     }
 };
 
-
-
-// import nodemailer from "nodemailer";
-// import dotenv from "dotenv";
-
-// dotenv.config();
-
-// export const sendVerificationOtpMail = async (targetEmail, storeName, otpCode) => {
-//     try {
-//         const transporter = nodemailer.createTransport({
-//             service: "gmail",
-//             auth: {
-//                 user: process.env.GMAIL_USER,
-//                 pass: process.env.GMAIL_PASS,
-//             },
-//         });
-
-//         const mailOptions = {
-//             from: `"Venclux Engine" <${process.env.GMAIL_USER}>`,
-//             to: targetEmail,
-//             subject: `[Venclux] Verify Your Storefront Engine Token: ${otpCode}`,
-//             html: `<p>Your onboarding verification code is: <b>${otpCode}</b></p>` // Simplified for fast testing
-//         };
-
-//         // FORCE Node to wait until Gmail acknowledges the delivery
-//         const info = await transporter.sendMail(mailOptions);
-        
-//         console.log("SMTP Server Accepted Delivery. Message ID:", info.messageId);
-//         return { success: true, messageId: info.messageId };
-
-//     } catch (err) {
-//         // This will print directly to your terminal if Google blocks your App Password
-//         console.error("DIAGNOSTIC ENGINE ERROR LOG:", err.message);
-//         throw err; // Throws it upward to your controller's catch block
-//     }
-// };
