@@ -20,7 +20,10 @@ const app = express();
 // --- SECURE CORS AND NETWORK INTEGRATION ---
 const allowedOrigins = [
   "http://localhost:5173", 
-  "http://127.0.0.1:5173"
+  "http://127.0.0.1:5173",
+  "https://venclux.site",                       // official production apex domain
+  "https://www.venclux.site",                   // official production www subdomain
+  "https://venclux-frontend-dkm9.vercel.app"    // deployment fallback domain
 ];
 
 // DYNAMICALLY INJECT PRODUCTION VERCEL URL IF IT EXISTS IN .ENV
@@ -37,6 +40,7 @@ app.use(cors({
       callback(null, true);
     } else {
       // Return false instead of throwing a hard backend Error to stop preflight crashes
+      console.warn(`⚠️ Blocked by CORS origin validation pipeline: ${origin}`);
       callback(null, false);
     }
   },
@@ -44,7 +48,6 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"] 
 }));
-// --- Note: Separate app.options line removed entirely since app.use(cors()) handles preflights perfectly! ---
 
 // Standard body-parsing middlewares
 app.use(express.json()); 
