@@ -216,6 +216,7 @@ export const resendOtp = async (req, res) => {
 // ==========================================
 export const login = async (req, res) => {
   try {
+    console.log("INBOUND LOGIN PAYLOAD:", req.body); 
     const { email, password } = req.body;
     const normalizedEmail = email.trim().toLowerCase();
 

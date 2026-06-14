@@ -53,9 +53,15 @@ export const sendVerificationOtpMail = async (targetEmail, storeName, otpCode) =
         };
 
         const info = await transporter.sendMail(mailOptions);
+        console.log("🚀 Live Production Mail Dispatched Successfully. ID:", info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (err) {
-        console.error("[Nodemailer Engine Core Error]:", err.message);
+        // 🌟 CRITICAL ERROR DIAGNOSTICS FOR RENDER LOGS
+        console.error("❌ --- LIVE PRODUCTION MAIL RUNTIME FAILURE --- ❌");
+        console.error("Reason:", err.message);
+        console.error("Error Code:", err.code);
+        if (err.command) console.error("SMTP Command attempted:", err.command);
+        console.error("-------------------------------------------------");
         return { success: false, error: err.message };
     }
 };
