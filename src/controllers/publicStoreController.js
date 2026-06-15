@@ -480,6 +480,13 @@ export const processWebCheckout = async (req, res) => {
 
     await newOrder.save();
 
+    // Increment unread notification count
+    try {
+      await User.findByIdAndUpdate(vendor._id, { $inc: { unreadNotifications: 1 } });
+    } catch (notifErr) {
+      console.error("[Notification Increment Error]:", notifErr.message);
+    }
+
     // Upsert customer record so the dashboard activeCustomers count reflects web buyers
     try {
       await Customer.findOneAndUpdate(

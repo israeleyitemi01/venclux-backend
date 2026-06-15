@@ -4,6 +4,7 @@ import { getStorefrontConfig, updateStorefrontConfig } from "../controllers/stor
 import { uploadBranding } from "../config/cloudinary.js"; // Pulling our new engine parameters mount
 import authMiddleware from "../middleware/authMiddleware.js";
 import { getSettings, updateStoreSettings, updateNotificationSettings, getBillingMetrics, uploadProfilePicture, deleteAccount, updateProfileSettings } from "../controllers/userSettingsController.js";
+import { globalSearch } from "../controllers/searchController.js";
 
 const router = express.Router();
 
@@ -37,5 +38,8 @@ router.put("/settings/profile", authMiddleware, updateProfileSettings);
 
 // Account deletion
 router.delete("/settings/account", authMiddleware, deleteAccount);
+
+// Global Search
+router.get("/search", authMiddleware, globalSearch);
 
 export default router;

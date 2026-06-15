@@ -124,6 +124,10 @@ export const sendNewOrderNotification = async (vendorEmail, storeName, orderDeta
                 Please log in to your Venclux dashboard to view full details and process this order.
             </p>
             
+            <div style="text-align: center; margin-top: 32px;">
+                <a href="https://www.venclux.site/admin/dashboard" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: bold; border-radius: 8px;">View Dashboard</a>
+            </div>
+            
             <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
             <p style="font-size: 11px; text-align: center; color: #94a3b8;">
                 Venclux Multi-Tenant Micro-SaaS Engine • Lagos, Nigeria
@@ -173,6 +177,10 @@ export const sendNotificationSettingsUpdateMail = async (vendorEmail, storeName)
             <p style="font-size: 14px; color: #475569; line-height: 1.6;">
                 Hello from <strong style="color: #0f172a;">${storeName}</strong>, your notification settings have been successfully updated on Venclux.
             </p>
+            
+            <div style="text-align: center; margin-top: 32px;">
+                <a href="https://www.venclux.site/admin/dashboard" style="display: inline-block; padding: 12px 24px; background-color: #0f172a; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: bold; border-radius: 8px;">View Dashboard</a>
+            </div>
         </div>
     `;
 
