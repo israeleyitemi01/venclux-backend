@@ -33,16 +33,8 @@ if (process.env.FRONTEND_URL) {
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or Postman)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      // Return false instead of throwing a hard backend Error to stop preflight crashes
-      console.warn(`⚠️ Blocked by CORS origin validation pipeline: ${origin}`);
-      callback(null, false);
-    }
+    // Always allow the origin (dynamic reflection for any domain)
+    callback(null, true);
   },
   credentials: true, 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
