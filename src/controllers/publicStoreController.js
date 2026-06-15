@@ -199,6 +199,7 @@ import { Product } from "../models/product.js";
 import { Order } from "../models/order.js";
 import { Customer } from "../models/customer.js";
 import httpStatus from "http-status";
+import { sendNewOrderNotification } from "../config/emailEngine.js";
 
 export const getPublicStorefront = async (req, res) => {
   try {
@@ -495,6 +496,11 @@ export const processWebCheckout = async (req, res) => {
     } catch (customerErr) {
       // Non-fatal — order is already saved; just log the customer upsert failure
       console.error("[Customer Upsert Warning]:", customerErr.message);
+    }
+
+    if (vendor.notifications && vendor.notifications.newOrder) {
+      sendNewOrderNotification(vendor.email, vendor.businessName, newOrder)
+        .catch(err => console.error("[Order Mail Warning]: Failed to dispatch order mail", err.message));
     }
 
     return res.status(httpStatus.CREATED).json({

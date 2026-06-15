@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import { User } from "../models/user.js";
 import { Product } from "../models/product.js";
 import { Order } from "../models/order.js";
+import { sendNotificationSettingsUpdateMail } from "../config/emailEngine.js";
 
 // @desc    Retrieve complete current active profile & preferences data object
 // @route   GET /api/user/settings
@@ -87,6 +88,10 @@ export const updateNotificationSettings = async (req, res) => {
             });
         }
 
+        // Send email notification dynamically
+        sendNotificationSettingsUpdateMail(updatedUser.email, updatedUser.businessName)
+            .catch(err => console.error("Failed to send notification settings email", err));
+
         return res.status(httpStatus.OK).json({
             statusCode: httpStatus.OK,
             message: "Notification configurations successfully updated!",
@@ -157,13 +162,13 @@ export const getBillingMetrics = async (req, res) => {
 // @route   PUT /api/vendor/settings/profile-picture
 export const uploadProfilePicture = async (req, res) => {
     try {
-        if (!req.files || !req.files.profilePicture) {
+        if (!req.file) {
             return res.status(httpStatus.BAD_REQUEST).json({
                 statusCode: httpStatus.BAD_REQUEST,
                 message: "No profile picture file uploaded."
             });
         }
-        const profilePicUrl = req.files.profilePicture[0].path;
+        const profilePicUrl = req.file.path;
 
         const updatedUser = await User.findByIdAndUpdate(
             req.user._id,
@@ -180,6 +185,41 @@ export const uploadProfilePicture = async (req, res) => {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
             statusCode: httpStatus.INTERNAL_SERVER_ERROR,
             message: "Failed to upload profile picture.",
+            error: error.message
+        });
+    }
+};
+
+// @desc    Update basic profile settings
+// @route   PUT /api/vendor/settings/profile
+export const updateProfileSettings = async (req, res) => {
+    try {
+        // We use name to map to the first/last name, and whatsappNumber for phone
+        const { firstName, lastName, phone } = req.body;
+        
+        const updateData = {};
+        if (firstName || lastName) {
+            updateData.name = `${firstName || ''} ${lastName || ''}`.trim();
+        }
+        if (phone) {
+            updateData.whatsappNumber = phone;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        ).select("-password");
+
+        return res.status(httpStatus.OK).json({
+            statusCode: httpStatus.OK,
+            message: "Profile settings updated successfully!",
+            data: updatedUser
+        });
+    } catch (error) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            message: "Failed to update profile settings.",
             error: error.message
         });
     }

@@ -220,6 +220,11 @@ const userSchema = new mongoose.Schema(
             customerMsg: { type: Boolean, default: false },
             weeklyReport: { type: Boolean, default: true },
             promotions: { type: Boolean, default: false }
+        },
+        
+        unreadNotifications: {
+            type: Number,
+            default: 0
         }
     },
     { timestamps: true }

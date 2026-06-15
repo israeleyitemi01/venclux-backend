@@ -3,7 +3,7 @@ import { setupVendorPayout } from "../controllers/vendorPayoutController.js";
 import { getStorefrontConfig, updateStorefrontConfig } from "../controllers/storefrontController.js";
 import { uploadBranding } from "../config/cloudinary.js"; // Pulling our new engine parameters mount
 import authMiddleware from "../middleware/authMiddleware.js";
-import { getSettings, updateStoreSettings, updateNotificationSettings, getBillingMetrics, uploadProfilePicture, deleteAccount } from "../controllers/userSettingsController.js";
+import { getSettings, updateStoreSettings, updateNotificationSettings, getBillingMetrics, uploadProfilePicture, deleteAccount, updateProfileSettings } from "../controllers/userSettingsController.js";
 
 const router = express.Router();
 
@@ -29,9 +29,11 @@ router.get("/settings/billing", authMiddleware, getBillingMetrics);
 router.put(
   "/settings/profile-picture",
   authMiddleware,
-  uploadBranding.fields([{ name: "profilePicture", maxCount: 1 }]),
+  uploadBranding.single("image"),
   uploadProfilePicture
 );
+
+router.put("/settings/profile", authMiddleware, updateProfileSettings);
 
 // Account deletion
 router.delete("/settings/account", authMiddleware, deleteAccount);
