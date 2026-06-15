@@ -13,7 +13,8 @@ const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER;
  */
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({})
+    const vendorId = req.user._id || req.user.id;
+    const orders = await Order.find({ vendorId: vendorId.toString() })
       .populate("items.productId")
       .sort({ createdAt: -1 });
       

@@ -95,3 +95,17 @@ export const getVendorCustomers = async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to pull merchant consumer nodes." });
   }
 };
+
+export const deleteCustomer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vendorId = req.user._id || req.user.id;
+    const deletedCustomer = await Customer.findOneAndDelete({ _id: id, vendorId: vendorId.toString() });
+    if (!deletedCustomer) {
+       return res.status(404).json({ success: false, message: "Customer not found." });
+    }
+    return res.status(200).json({ success: true, message: "Customer successfully deleted." });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete customer.", error: error.message });
+  }
+};

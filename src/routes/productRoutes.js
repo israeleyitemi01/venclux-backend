@@ -21,6 +21,7 @@ import { getProducts, createProduct, updateProduct, deleteProduct } from "../con
 import authMiddleware from "../middleware/authMiddleware.js";
 import { upload } from "../config/cloudinary.js";
 import { validate } from "../middleware/validate.js";
+import { checkProductLimit } from "../middleware/checkProductLimit.js";
 import { productSchema, updateProductSchema } from "../validators/productValidator.js";
 
 const router = express.Router();
@@ -30,8 +31,8 @@ router.use(authMiddleware);
 router.get("/list", getProducts);
 
 // Use Multer middleware to parse standard single file items matching form names 
-router.post("/create", upload.single("image"), validate(productSchema), createProduct);
-router.put("/update/:id", upload.single("image"), validate(updateProductSchema), updateProduct);
+router.post("/create", upload.single("image"), checkProductLimit, validate(productSchema), createProduct);
+router.put("/update/:id", upload.single("image"), checkProductLimit, validate(updateProductSchema), updateProduct);
 router.delete("/delete/:id", deleteProduct);
 
 export default router;
