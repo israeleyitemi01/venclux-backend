@@ -3,7 +3,7 @@ import { setupVendorPayout } from "../controllers/vendorPayoutController.js";
 import { getStorefrontConfig, updateStorefrontConfig } from "../controllers/storefrontController.js";
 import { uploadBranding } from "../config/cloudinary.js"; // Pulling our new engine parameters mount
 import authMiddleware from "../middleware/authMiddleware.js";
-import { getSettings, updateStoreSettings, updateNotificationSettings, getBillingMetrics, uploadProfilePicture, deleteAccount, updateProfileSettings } from "../controllers/userSettingsController.js";
+import { getSettings, updateStoreSettings, updateNotificationSettings, getBillingMetrics, uploadProfilePicture, deleteAccount, updateProfileSettings, clearNotifications } from "../controllers/userSettingsController.js";
 import { globalSearch } from "../controllers/searchController.js";
 
 const router = express.Router();
@@ -25,6 +25,7 @@ router.get("/settings", authMiddleware, getSettings);
 router.put("/settings/store", authMiddleware, updateStoreSettings);
 router.put("/settings/notifications", authMiddleware, updateNotificationSettings);
 router.get("/settings/billing", authMiddleware, getBillingMetrics);
+router.put("/settings/notifications/clear", authMiddleware, clearNotifications);
 
 // Profile picture upload
 router.put(

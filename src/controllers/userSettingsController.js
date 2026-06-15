@@ -106,6 +106,30 @@ export const updateNotificationSettings = async (req, res) => {
     }
 };
 
+// @desc    Clear unread notifications count
+// @route   PUT /api/vendor/settings/notifications/clear
+export const clearNotifications = async (req, res) => {
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { $set: { unreadNotifications: 0 } },
+            { new: true }
+        ).select("-password");
+
+        return res.status(httpStatus.OK).json({
+            statusCode: httpStatus.OK,
+            message: "Notifications cleared",
+            data: updatedUser.unreadNotifications
+        });
+    } catch (error) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            message: "Failed to clear notifications",
+            error: error.message
+        });
+    }
+};
+
 // @desc    Retrieve dynamic usage telemetry and subscription metrics for billing dashboards
 // @route   GET /api/vendor/settings/billing
 export const getBillingMetrics = async (req, res) => {
